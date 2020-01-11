@@ -1,10 +1,6 @@
 import React from 'react';
 import {StyleSheet} from 'react-native';
-import {getDeviceDimensions, SUPPORTED_IMAGE, SUPPORTED_VIDEO} from './constants/constants';
 import * as Animatable from 'react-native-animatable';
-import Video from 'react-native-video';
-
-const AnimatedVideo = Animatable.createAnimatableComponent(Video);
 
 const getMediaUri = media => media ? media.src : null;
 
@@ -20,6 +16,7 @@ class Slide2 extends React.Component {
 
     this.stopShowImage = () => {
       this.mediaTimeout = setTimeout(() => {
+        console.log('Why u here')
         if (this.props.onFinish) {
           this.props.onFinish();
         }
@@ -29,60 +26,16 @@ class Slide2 extends React.Component {
     };
   }
 
-  setPausedOnFinish() {
-    const { onFinish } = this.props;
-    onFinish();
-    this.setState({paused: false});
-  }
-
-  onBeforeFinish(_time) {
-    const { onBeforeFinish } = this.props;
-    let endTime = _time.seekableDuration;
-    if (this.props.content && this.props.content.duration) endTime = Math.min(endTime, this.props.content.duration / 1000);
-    if ((endTime - _time.currentTime) < this.props.delayBeforeFinish) {
-      onBeforeFinish();
-    }
-    if (this.props.content.duration) {
-      if (_time.currentTime < _time.seekableDuration &&
-        _time.currentTime * 1000 >= this.props.content.duration) {
-        const { onFinish } = this.props;
-        setTimeout(() => {
-          onFinish();
-        }, 0)
-      }
-    }
-  }
-
-  setPaused() {
-    console.log('Loaded', this.props.content.media.name);
-    this.setState({
-      paused: true
-    });
-  }
-
   _render(opacity) {
     const { content } = this.props;
     const media = content ? content.media : null;
     const uri = getMediaUri(media);
-
-    let imageOpacity = opacity, videoOpacity = opacity;
-    let isShowingVideo = false;
-    let sourceVideo, sourceImage;
-    //console.log(`render Img at ${moment().format('HH:mm:ss')} : ${media.name}`);
-    if (!media) {
-      videoOpacity = 0;
-      imageOpacity = 0;
-    } else if (SUPPORTED_IMAGE.includes(media.ext)) {
-      videoOpacity = 0;
-      if (opacity > 0) this.stopShowImage();
-      sourceImage = uri;
-    } else if (SUPPORTED_VIDEO.includes(media.ext)) {
-      imageOpacity = 0;
-      if (opacity > 0) isShowingVideo = true;
-      sourceVideo = uri;
+    if (opacity > 0) {
+      this.stopShowImage();
     }
+    console.log(uri);
     return (
-      [<Animatable.Image
+      <Animatable.Image
         key={`image` + this.props.key2}
         useNativeDriver={true}
         animation={this.props.animation}
@@ -91,48 +44,22 @@ class Slide2 extends React.Component {
           () => console.log('error loading image')
         }
         easing="linear"
-        source={sourceImage}
+        source={uri}
         style={{
-          ...{opacity: imageOpacity},
+          ...{opacity: 0},
           ...StyleSheet.absoluteFillObject,
-          ...getDeviceDimensions(),
+          ...this.props.getDeviceDimensions(),
           zIndex: 2
         }}
-      />,
-        <Video
-          key={`video_` + this.props.key2}
-          onReadyForDisplay={this.setPaused.bind(this)}
-          ref={p => this.player = p}
-          useNativeDriver={true}
-          useTextureView={false}
-          //animation={this.props.animation}
-          duration={300}
-          style={{
-            ...{opacity: videoOpacity},
-            ...StyleSheet.absoluteFillObject,
-            ...getDeviceDimensions(),
-            zIndex: 2
-          }}
-          source={sourceVideo}
-          onProgress={isShowingVideo ? this.onBeforeFinish.bind(this) : () => {
-          }}
-          onEnd={isShowingVideo ? this.setPausedOnFinish.bind(this) : () => {
-          }}
-          onError={isShowingVideo ? this.setPausedOnFinish.bind(this) : () => {
-          }}
-          repeat={false}
-          paused={isShowingVideo ? false : this.state.paused}
-        />
-      ]
+      />
     );
 
   }
 
   render() {
     const {content, step} = this.props;
-
-    if (step === 'next' +
-      '') {
+    console.log(content, step)
+    if (step === 'next') {
       return this._render.bind(this)(0);
     }
 

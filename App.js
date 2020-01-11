@@ -7,6 +7,7 @@ import 'react-native';
 import React from 'react';
 import moment from 'moment';
 import SlideShow2 from './src/SlideShow2';
+import {getDeviceDimensions, SUPPORTED_IMAGE, SUPPORTED_VIDEO} from './src/constants/constants';
 import View from 'react-native-web/dist/exports/View';
 import Text from 'react-native-web/dist/exports/Text';
 
@@ -15,18 +16,27 @@ setInterval(() => {
   timeCount += 1;
 }, 200);
 
+function normalize(playlist) {
+  return playlist.map(play => {
+    let newPlay = play;
+    newPlay.media.isVideo = SUPPORTED_VIDEO.includes(play.media.ext);
+    newPlay.media.isImage = SUPPORTED_IMAGE.includes(play.media.ext);
+    return newPlay;
+  })
+}
+
 export default class TestApp extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      currentPlayList: [{ media: { name: 'src1', src: require('./assets/video1.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 3000 },
+      currentPlayList: normalize([{ media: { name: 'src1', src: require('./assets/video1.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 3000 },
         { media: { name: 'src2', src: require('./assets/small.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 3000 },
         { media: { name: 'src3', src: require('./assets/img3.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 3000 },
         { media: { name: 'src4', src: require('./assets/img4.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 3000 },
-        { media: { name: 'src5', src: require('./assets/viking.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 3000 }],
+        { media: { name: 'src5', src: require('./assets/viking.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 3000 }]),
       currentContentIndex: 0,
-    }
+    };
     this.count = 0;
     this.status = [];
     this.slideShowRef = React.createRef();
@@ -43,29 +53,29 @@ export default class TestApp extends React.Component {
   }
 
   render() {
-    if (this.slideShowRef.current) {
-      if (!this.preTime) this.preTime = moment();
-      const nodeFlag = this.slideShowRef.current.nodeFlag;
-      this.status.push({
-        count: this.count + 1,
-        nodeFlag: nodeFlag,
-        current: {
-          name: this.slideShowRef.current.slide[Number(nodeFlag)].content.media.name,
-          step: this.slideShowRef.current.slide[Number(nodeFlag)].step
-        },
-        next: {
-          name: this.slideShowRef.current.slide[Number(!nodeFlag)].content.media.name,
-          step: this.slideShowRef.current.slide[Number(!nodeFlag)].step
-        },
-        duration: timeCount * 200,
-      });
-      this.preTime = moment();
-      this.count += 1;
-    }
+    // if (this.slideShowRef.current) {
+    //   if (!this.preTime) this.preTime = moment();
+    //   const nodeFlag = this.slideShowRef.current.nodeFlag;
+    //   this.status.push({
+    //     count: this.count + 1,
+    //     nodeFlag: nodeFlag,
+    //     current: {
+    //       name: this.slideShowRef.current.slide[Number(nodeFlag)].content.media.name,
+    //       step: this.slideShowRef.current.slide[Number(nodeFlag)].step
+    //     },
+    //     next: {
+    //       name: this.slideShowRef.current.slide[Number(!nodeFlag)].content.media.name,
+    //       step: this.slideShowRef.current.slide[Number(!nodeFlag)].step
+    //     },
+    //     duration: timeCount * 200,
+    //   });
+    //   this.preTime = moment();
+    //   this.count += 1;
+    // }
     let { currentContentIndex, currentPlayList } = this.state;
     let currentContent = currentPlayList[currentContentIndex];
     let nextContent = currentPlayList[(currentContentIndex + 1) % currentPlayList.length];
     return (
-      <SlideShow2 key={2} ref={this.slideShowRef} currentContent={currentContent} nextContent={nextContent} setNextContentCallback={this.setNextContentCallback.bind(this)}/>);
+      <SlideShow2 key={2} ref={this.slideShowRef} currentContent={currentContent} nextContent={nextContent} setNextContentCallback={this.setNextContentCallback.bind(this)} getDeviceDimensions={getDeviceDimensions}/>);
   }
 }
