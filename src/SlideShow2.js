@@ -5,6 +5,8 @@ import _ from 'lodash';
 import Slide2 from "./Slide2";
 import { convertToReactAnimation, SUPPORTED_IMAGE } from './constants/constants';
 
+const delayBeforeFinish = 2;
+
 class SlideShow2 extends React.Component {
   static propTypes = {};
 
@@ -32,7 +34,7 @@ class SlideShow2 extends React.Component {
   }
 
   render() {
-    let {currentContent, backgroundContent, setNextContentCallback} = this.props;
+    let {currentContent, nextContent, setNextContentCallback} = this.props;
 
     this.slide[Number(this.nodeFlag)] = {
       content: currentContent,
@@ -42,8 +44,8 @@ class SlideShow2 extends React.Component {
       cbChangeState: this.setContentForNextSlide.bind(this),
     };
     this.slide[Number(!this.nodeFlag)] = {
-      content: (this.shouldSetContentForBackgroundVideo || SUPPORTED_IMAGE.includes(currentContent.media.ext) ? backgroundContent : null),
-      step: 'background',
+      content: (this.shouldSetContentForBackgroundVideo || SUPPORTED_IMAGE.includes(currentContent.media.ext) ? nextContent : null),
+      step: 'next',
       cb: null,
       cbChangeState: null,
     };
@@ -56,7 +58,8 @@ class SlideShow2 extends React.Component {
                 animation={this.slide[0].animation}
                 step={this.slide[0].step}
                 onFinish={this.slide[0].cb}
-                onBeforeFinish={this.slide[0].cbChangeState}/>
+                onBeforeFinish={this.slide[0].cbChangeState}
+                delayBeforeFinish={delayBeforeFinish}/>
 
         <Slide2 key={'slide1'}
                 key2={'slide1'}
@@ -64,7 +67,8 @@ class SlideShow2 extends React.Component {
                 animation={this.slide[1].animation}
                 step={this.slide[1].step}
                 onFinish={this.slide[1].cb}
-                onBeforeFinish={this.slide[1].cbChangeState}/>
+                onBeforeFinish={this.slide[1].cbChangeState}
+                delayBeforeFinish={delayBeforeFinish}/>
 
       </View>
     );

@@ -30,20 +30,38 @@ class Slide2 extends React.Component {
   }
 
   setPausedOnFinish() {
-    const {onFinish} = this.props;
+    const { onFinish } = this.props;
     onFinish();
     this.setState({paused: false});
   }
 
   onBeforeFinish(_time) {
-    const {onBeforeFinish} = this.props;
-    if ((_time.seekableDuration - _time.currentTime) < 1) {
+    const { onBeforeFinish } = this.props;
+    let endTime = _time.seekableDuration;
+    if (this.props.content && this.props.content.duration) endTime = Math.min(endTime, this.props.content.duration / 1000);
+    if ((endTime - _time.currentTime) < this.props.delayBeforeFinish) {
       onBeforeFinish();
+    }
+    if (this.props.content.duration) {
+      if (_time.currentTime < _time.seekableDuration &&
+        _time.currentTime * 1000 >= this.props.content.duration) {
+        const { onFinish } = this.props;
+        setTimeout(() => {
+          onFinish();
+        }, 0)
+      }
     }
   }
 
+  setPaused() {
+    console.log('Loaded', this.props.content.media.name);
+    this.setState({
+      paused: true
+    });
+  }
+
   _render(opacity) {
-    const {content, onFinish} = this.props;
+    const { content } = this.props;
     const media = content ? content.media : null;
     const uri = getMediaUri(media);
 
@@ -83,11 +101,8 @@ class Slide2 extends React.Component {
       />,
         <Video
           key={`video_` + this.props.key2}
-          onLoad={() => {
-            this.setState({
-              paused: true
-            });
-          }}
+          onReadyForDisplay={this.setPaused.bind(this)}
+          ref={p => this.player = p}
           useNativeDriver={true}
           useTextureView={false}
           //animation={this.props.animation}
@@ -116,7 +131,8 @@ class Slide2 extends React.Component {
   render() {
     const {content, step} = this.props;
 
-    if (step === 'background') {
+    if (step === 'next' +
+      '') {
       return this._render.bind(this)(0);
     }
 
