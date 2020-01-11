@@ -1,14 +1,12 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import moment from 'moment';
-import { convertToReactAnimation, getDeviceDimensions, SUPPORTED_IMAGE, SUPPORTED_VIDEO } from './constants/constants';
+import {StyleSheet} from 'react-native';
+import {getDeviceDimensions, SUPPORTED_IMAGE, SUPPORTED_VIDEO} from './constants/constants';
 import * as Animatable from 'react-native-animatable';
 import Video from 'react-native-video';
-import _ from 'lodash';
 
 const AnimatedVideo = Animatable.createAnimatableComponent(Video);
 
-const getMediaUri = media => media.src;
+const getMediaUri = media => media ? media.src : null;
 
 class Slide2 extends React.Component {
   mediaTimeout = null;
@@ -17,13 +15,8 @@ class Slide2 extends React.Component {
     super(props);
 
     this.state = {
-      paused: false,
-      continueRender: true
+      paused: false
     };
-
-    this.stopPlay = _.once(() => {
-      setTimeout(() => this.setState({ paused: true }), 1)
-    });
 
     this.stopShowImage = () => {
       this.mediaTimeout = setTimeout(() => {
@@ -34,55 +27,55 @@ class Slide2 extends React.Component {
         this.mediaTimeout = null;
       }, this.props.content.duration);
     };
-
-    this.logPrepare = _.once(() => {
-      console.debug(`prepare VideoView at ${moment().format('HH:mm:ss')}: ${content.media.name}`);
-    });
   }
 
-  componentWillUnmount() {
-    if (this.mediaTimeout) {
-      //console.log(`componentWillUnmount at ${moment().format('HH:mm:ss')} : ${content.media.name}`);
-      clearTimeout(this.mediaTimeout);
-    }
-    if (this.timeoutStopRender) {
-      clearTimeout(this.timeoutStopRender);
-    }
-
-    this.stopPlay = null;
-    this.stopShowImage = null;
-    this.logPrepare = null;
-    this.setTimeoutStopRender = null;
+  setPausedOnFinish() {
+    const {onFinish} = this.props;
+    onFinish();
+    this.setState({paused: false});
   }
 
-  renderCurrent(opacity) {
-    const { content, onFinish } = this.props;
-    const media = content.media;
+  onBeforeFinish(_time) {
+    const {onBeforeFinish} = this.props;
+    if ((_time.seekableDuration - _time.currentTime) < 1) {
+      onBeforeFinish();
+    }
+  }
+
+  _render(opacity) {
+    const {content, onFinish} = this.props;
+    const media = content ? content.media : null;
     const uri = getMediaUri(media);
 
     let imageOpacity = opacity, videoOpacity = opacity;
-
+    let isShowingVideo = false;
+    let sourceVideo, sourceImage;
     //console.log(`render Img at ${moment().format('HH:mm:ss')} : ${media.name}`);
-    if (SUPPORTED_IMAGE.includes(media.ext)) {
-      videoOpacity = 0
-      this.stopShowImage();
+    if (!media) {
+      videoOpacity = 0;
+      imageOpacity = 0;
+    } else if (SUPPORTED_IMAGE.includes(media.ext)) {
+      videoOpacity = 0;
+      if (opacity > 0) this.stopShowImage();
+      sourceImage = uri;
     } else if (SUPPORTED_VIDEO.includes(media.ext)) {
       imageOpacity = 0;
+      if (opacity > 0) isShowingVideo = true;
+      sourceVideo = uri;
     }
     return (
       [<Animatable.Image
         key={`image` + this.props.key2}
-        ref={ref => this.img = ref}
         useNativeDriver={true}
-        //animation={convertToReactAnimation(content.effect)}
+        animation={this.props.animation}
         duration={300}
         onError={
           () => console.log('error loading image')
         }
         easing="linear"
-        source={uri}
+        source={sourceImage}
         style={{
-          ...{ opacity: imageOpacity },
+          ...{opacity: imageOpacity},
           ...StyleSheet.absoluteFillObject,
           ...getDeviceDimensions(),
           zIndex: 2
@@ -90,70 +83,47 @@ class Slide2 extends React.Component {
       />,
         <Video
           key={`video_` + this.props.key2}
-          ref={ref => (this.player = ref)}
-          id={this.props.id}
+          onLoad={() => {
+            this.setState({
+              paused: true
+            });
+          }}
           useNativeDriver={true}
           useTextureView={false}
-          //animation={convertToReactAnimation(content.effect)}
+          //animation={this.props.animation}
           duration={300}
           style={{
-            ...{ opacity: videoOpacity },
+            ...{opacity: videoOpacity},
             ...StyleSheet.absoluteFillObject,
             ...getDeviceDimensions(),
             zIndex: 2
           }}
-          source={uri}
-          onEnd={onFinish}
-          onError={onFinish}
-          //onProgress={this.onProgress}
+          source={sourceVideo}
+          onProgress={isShowingVideo ? this.onBeforeFinish.bind(this) : () => {
+          }}
+          onEnd={isShowingVideo ? this.setPausedOnFinish.bind(this) : () => {
+          }}
+          onError={isShowingVideo ? this.setPausedOnFinish.bind(this) : () => {
+          }}
           repeat={false}
-          paused={false}
+          paused={isShowingVideo ? false : this.state.paused}
         />
       ]
     );
 
   }
 
-  renderPrepareVideo() {
-    const { content } = this.props;
-
-    this.stopPlay();
-    this.logPrepare();
-    return (
-      <AnimatedVideo
-        id={this.props.id}
-        useNativeDriver={true}
-        useTextureView={false}
-        src={{ uri: getMediaUri(content.media) }}
-        style={{
-          ...StyleSheet.absoluteFillObject,
-          width: 0, height: 0,
-          zIndex: 0
-        }}
-        paused={this.state.paused}
-      />
-    )
-  }
-
   render() {
-    const { content, step } = this.props;
-    const media = content.media;
+    const {content, step} = this.props;
 
     if (step === 'background') {
-      return this.renderCurrent.bind(this)(0);
+      return this._render.bind(this)(0);
     }
 
     if (step === 'current') {
-      return this.renderCurrent.bind(this)(100);
+      return this._render.bind(this)(100);
     }
-
-    //render prepare
-
-    if (!SUPPORTED_VIDEO.includes(media.ext)) {
-      return null;
-    }
-
-    return this.renderPrepareVideo.bind(this)();
+    return null;
   }
 }
 
