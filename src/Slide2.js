@@ -16,7 +16,6 @@ class Slide2 extends React.Component {
 
     this.stopShowImage = () => {
       this.mediaTimeout = setTimeout(() => {
-        console.log('Why u here')
         if (this.props.onFinish) {
           this.props.onFinish();
         }
@@ -33,7 +32,6 @@ class Slide2 extends React.Component {
     if (opacity > 0) {
       this.stopShowImage();
     }
-    console.log(uri);
     return (
       <Animatable.Image
         key={`image` + this.props.key2}
@@ -58,7 +56,6 @@ class Slide2 extends React.Component {
 
   render() {
     const {content, step} = this.props;
-    console.log(content, step)
     if (step === 'next') {
       return this._render.bind(this)(0);
     }

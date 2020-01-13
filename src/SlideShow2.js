@@ -1,30 +1,46 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import v1 from 'uuid/v1';
 import _ from 'lodash';
-import Slide2 from "./Slide2";
-import {convertToReactAnimation, getDeviceDimensions, SUPPORTED_IMAGE} from './constants/constants';
-import Video from "react-native-video";
+import Slide2 from './Slide2';
+import { convertToReactAnimation, getDeviceDimensions, SUPPORTED_IMAGE, SUPPORTED_VIDEO } from './constants/constants';
+import Video from 'react-native-video';
 
 const delayBeforeFinish = 2;
-
 class SlideShow2 extends React.Component {
   static propTypes = {};
-
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      isLoading: true
+    };
     this.nodeFlag = true;
-    this.slide = [{step: 'next'}, {step: 'next'}];
+    this.slide = [{ step: 'next' }, { step: 'next' }];
     this.videoSlide = {
       opacity: 0,
       source: null,
+    };
+    this.isPlaying = false;
+    this.preRender(props);
+  }
+  onBeforeFinish(_time) {
+    let { currentContent, setNextContentCallback } = this.props;
+    if (currentContent.media.type === 'video' && currentContent.duration && currentContent.duration != 0 && this.isPlaying) {
+      if (_time.currentTime * 1000 >= currentContent.duration) {
+        setNextContentCallback();
+        this.isPlaying = false;
+      }
     }
   }
-
-  render() {
-    let {currentContent, nextContent, setNextContentCallback, getDeviceDimensions} = this.props;
-    if (currentContent.media.isImage) {
+  setOnLoad() {
+    this.setState({
+      isLoading: false
+    });
+    this.isPlaying = true;
+  }
+  preRender(props) {
+    let { currentContent, nextContent, setNextContentCallback } = props;
+    if (currentContent.media.type === 'image') {
       this.nodeFlag = !this.nodeFlag;
       this.slide[Number(this.nodeFlag)] = {
         content: currentContent,
@@ -32,30 +48,43 @@ class SlideShow2 extends React.Component {
         cb: setNextContentCallback,
         animation: convertToReactAnimation(currentContent.effect)
       };
-      this.slide[Number(!this.nodeFlag)].step = 'next'
+      this.slide[Number(!this.nodeFlag)].step = 'next';
       this.videoSlide = {
         opacity: 0,
         source: null
       }
     } else {
-      if (currentContent.media.isVideo) {
+      if (currentContent.media.type === 'video') {
         this.videoSlide = {
           opacity: 100,
-          source: currentContent.media.src
-        }
+          source: currentContent.media.source
+        };
       }
       this.slide[Number(this.nodeFlag)].step = 'next';
     }
-    if (nextContent.media.isImage) {
+    if (nextContent.media.type === 'image') {
       this.slide[Number(!this.nodeFlag)] = {
         content: nextContent,
         step: 'next',
         cb: null
       };
+    } else if (nextContent.media.type === 'video' && currentContent.media.type !== 'video') {
+      this.videoSlide = {
+        opacity: 0,
+        source: nextContent.media.source
+      };
     }
-    console.log(currentContent.media);
+  }
+  UNSAFE_componentWillReceiveProps(props) {
+    this.preRender(props);
+    this.setState({
+      isLoading: true
+    });
+  }
+  render() {
+    const { currentContent, getDeviceDimensions, setNextContentCallback } = this.props;
     return (
-      <View style={{justifyContent: 'center', flex: 1}}>
+      <View style={{ justifyContent: 'center', flex: 1 }}>
         <Slide2 key={'slide0'}
                 key2={'slide0'}
                 content={this.slide[0].content}
@@ -75,24 +104,25 @@ class SlideShow2 extends React.Component {
           useNativeDriver={true}
           useTextureView={false}
           //animation={this.props.animation}
+          onLoad={this.setOnLoad.bind(this)}
           duration={300}
           style={{
-            ...{opacity: this.videoSlide.opacity},
+            ...{ opacity: this.videoSlide.opacity },
             ...StyleSheet.absoluteFillObject,
             ...getDeviceDimensions(),
             zIndex: 2
           }}
           source={this.videoSlide.source}
-          // onProgress={isShowingVideo ? this.onBeforeFinish.bind(this) : () => {}}
+          onProgress={this.onBeforeFinish.bind(this)}
           onEnd={setNextContentCallback}
-          onError={setNextContentCallback}
+          // onError={setNextContentCallback}
           repeat={false}
-          paused={false}
+          paused={currentContent.media.type === 'video' ? false : !this.state.isLoading}
         />
-
       </View>
     );
   }
 }
-
 export default SlideShow2;
+
+

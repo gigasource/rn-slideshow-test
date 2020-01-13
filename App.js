@@ -19,8 +19,9 @@ setInterval(() => {
 function normalize(playlist) {
   return playlist.map(play => {
     let newPlay = play;
-    newPlay.media.isVideo = SUPPORTED_VIDEO.includes(play.media.ext);
-    newPlay.media.isImage = SUPPORTED_IMAGE.includes(play.media.ext);
+    if (SUPPORTED_VIDEO.includes(play.media.ext)) newPlay.media.type = 'video';
+    if (SUPPORTED_IMAGE.includes(play.media.ext)) newPlay.media.type = 'image';
+    play.media.source = play.media.src;
     return newPlay;
   })
 }
@@ -30,11 +31,11 @@ export default class TestApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentPlayList: normalize([{ media: { name: 'src1', src: require('./assets/video1.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 3000 },
+      currentPlayList: normalize([{ media: { name: 'src1', src: require('./assets/video1.mp4'), ext: '.mp4' }, effect: 'slideInLeft'},
         { media: { name: 'src2', src: require('./assets/small.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 3000 },
         { media: { name: 'src3', src: require('./assets/img3.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 3000 },
         { media: { name: 'src4', src: require('./assets/img4.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 3000 },
-        { media: { name: 'src5', src: require('./assets/viking.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 3000 }]),
+        { media: { name: 'src5', src: require('./assets/viking.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 0 }]),
       currentContentIndex: 0,
     };
     this.count = 0;
