@@ -5,11 +5,14 @@
 
 import 'react-native';
 import React from 'react';
-import moment from 'moment';
 import SlideShow2 from './src/SlideShow2';
-import {getDeviceDimensions, SUPPORTED_IMAGE, SUPPORTED_VIDEO} from './src/constants/constants';
-import View from 'react-native-web/dist/exports/View';
-import Text from 'react-native-web/dist/exports/Text';
+import {
+  convertToReactAnimation,
+  getDeviceDimensions,
+  SUPPORTED_IMAGE,
+  SUPPORTED_VIDEO
+} from './src/constants/constants';
+import _ from 'lodash';
 
 let timeCount = 0;
 setInterval(() => {
@@ -18,11 +21,12 @@ setInterval(() => {
 
 function normalize(playlist) {
   return playlist.map(play => {
-    let newPlay = play;
-    if (SUPPORTED_VIDEO.includes(play.media.ext)) newPlay.media.type = 'video';
-    if (SUPPORTED_IMAGE.includes(play.media.ext)) newPlay.media.type = 'image';
-    play.media.source = play.media.src;
-    return newPlay;
+    let _play = _.cloneDeep(play);
+    if (SUPPORTED_VIDEO.includes(_play.media.ext)) _play.media.type = 'video';
+    if (SUPPORTED_IMAGE.includes(_play.media.ext)) _play.media.type = 'image';
+    _play.media.source = _play.media.src;
+    _play.effect = convertToReactAnimation(_play.effect)
+    return _play;
   })
 }
 

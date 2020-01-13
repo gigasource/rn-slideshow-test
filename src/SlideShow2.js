@@ -1,12 +1,8 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import v1 from 'uuid/v1';
-import _ from 'lodash';
+import {StyleSheet, View} from 'react-native';
 import Slide2 from './Slide2';
-import { convertToReactAnimation, getDeviceDimensions, SUPPORTED_IMAGE, SUPPORTED_VIDEO } from './constants/constants';
 import Video from 'react-native-video';
 
-const delayBeforeFinish = 2;
 class SlideShow2 extends React.Component {
   static propTypes = {};
   constructor(props) {
@@ -46,7 +42,7 @@ class SlideShow2 extends React.Component {
         content: currentContent,
         step: 'current',
         cb: setNextContentCallback,
-        animation: convertToReactAnimation(currentContent.effect)
+        animation: currentContent.effect
       };
       this.slide[Number(!this.nodeFlag)].step = 'next';
       this.videoSlide = {
