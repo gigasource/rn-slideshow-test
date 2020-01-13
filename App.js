@@ -37,11 +37,12 @@ export default class TestApp extends React.Component {
     this.count = 0;
     this.state = {
       currentPlayList: normalize([
-        // { media: { name: 'src3', src: require('./assets/img3.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 3000 },
+        { media: { name: 'src3', src: require('./assets/img3.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 3000 },
         { media: { name: 'src1', src: require(`./assets/video1.mp4`), ext: '.mp4' }, effect: 'slideInLeft'},
-        // { media: { name: 'src4', src: require('./assets/img4.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 3000 },
-        // { media: { name: 'src2', src: require('./assets/small.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 3000 },
-        // { media: { name: 'src5', src: require('./assets/viking.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 0 }
+        { media: { name: 'src1', src: require(`./assets/video1.mp4`), ext: '.mp4' }, effect: 'slideInLeft'},
+        { media: { name: 'src4', src: require('./assets/img4.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 3000 },
+        { media: { name: 'src2', src: require('./assets/small.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 3000 },
+        { media: { name: 'src5', src: require('./assets/viking.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 0 }
         ]),
       currentContentIndex: 0,
     };

@@ -104,7 +104,7 @@ class SlideShow2 extends React.Component {
                 getDeviceDimensions={getDeviceDimensions}/>
         <Video
           key={`video0`}
-          ref={p => this.video = p}
+          resizeMode={'contain'}
           useNativeDriver={true}
           useTextureView={false}
           //animation={this.props.animation}
