@@ -2,8 +2,6 @@ import React from 'react';
 import {StyleSheet} from 'react-native';
 import * as Animatable from 'react-native-animatable';
 
-const getMediaUri = media => media ? media.src : null;
-
 class Slide2 extends React.Component {
   mediaTimeout = null;
 
@@ -28,7 +26,7 @@ class Slide2 extends React.Component {
   _render(opacity) {
     const { content } = this.props;
     const media = content ? content.media : null;
-    const uri = getMediaUri(media);
+    const source = media ? media.source : null;
     if (opacity > 0) {
       this.stopShowImage();
     }
@@ -42,9 +40,9 @@ class Slide2 extends React.Component {
           () => console.log('error loading image')
         }
         easing="linear"
-        source={uri}
+        source={source}
         style={{
-          ...{opacity: 0},
+          ...{opacity: opacity},
           ...StyleSheet.absoluteFillObject,
           ...this.props.getDeviceDimensions(),
           zIndex: 2
