@@ -34,7 +34,7 @@ class Slide2 extends React.Component {
       <Animatable.Image
         key={`image` + this.props.key2}
         useNativeDriver={true}
-        animation={this.props.animation}
+        // animation={this.props.animation}
         duration={300}
         onError={
           () => console.log('error loading image')

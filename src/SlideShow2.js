@@ -2,6 +2,8 @@ import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import Slide2 from './Slide2';
 import Video from 'react-native-video';
+import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource'
+import _ from 'lodash';
 
 class SlideShow2 extends React.Component {
   static propTypes = {};
@@ -10,6 +12,7 @@ class SlideShow2 extends React.Component {
     this.state = {
       isLoading: true
     };
+    this.count = 1;
     this.nodeFlag = true;
     this.slide = [{ step: 'next' }, { step: 'next' }];
     this.videoSlide = {
@@ -17,6 +20,7 @@ class SlideShow2 extends React.Component {
       source: null,
     };
     this.isPlaying = false;
+    this.repeat = false;
     this.preRender(props);
   }
   onBeforeFinish(_time) {
@@ -70,6 +74,9 @@ class SlideShow2 extends React.Component {
         source: nextContent.media.source
       };
     }
+    this.videoSlide.source = resolveAssetSource(this.videoSlide.source);
+    if (this.repeat) this.videoSlide.source.mainVer = this.count++;
+    this.repeat = _.isEqual(currentContent.media.source, nextContent.media.source);
   }
   UNSAFE_componentWillReceiveProps(props) {
     this.preRender(props);
@@ -97,10 +104,13 @@ class SlideShow2 extends React.Component {
                 getDeviceDimensions={getDeviceDimensions}/>
         <Video
           key={`video0`}
+          ref={p => this.video = p}
           useNativeDriver={true}
           useTextureView={false}
           //animation={this.props.animation}
-          onLoad={this.setOnLoad.bind(this)}
+          onLoad={() => {
+            this.setOnLoad.bind(this)();
+          }}
           duration={300}
           style={{
             ...{ opacity: this.videoSlide.opacity },
