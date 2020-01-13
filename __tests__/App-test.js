@@ -33,7 +33,8 @@ jest.mock('react-native-video', function () {
       this._onLoad = false;
     }
     render() {
-      if (this.props.onLoad !== this._onLoad && this.props.source && !this._onLoad) {
+      if (this.props.onLoad && this.props.source && !this._onLoad && this.props.source !== this._source) {
+        this._source = this.props.source;
         this._onLoad = true;
         setTimeout(() => {
           this.props.onLoad();
@@ -55,7 +56,7 @@ jest.mock('react-native-video', function () {
             // console.log("onEnd");
             this.props.onEnd();
             this._onLoad = false;
-          }, 3000)
+          }, 2900)
         }
       }
       return null;

@@ -6,6 +6,7 @@
 import 'react-native';
 import React from 'react';
 import SlideShow2 from './src/SlideShow2';
+import moment from 'moment'
 import {
   convertToReactAnimation,
   getDeviceDimensions,
@@ -37,11 +38,11 @@ export default class TestApp extends React.Component {
     this.count = 0;
     this.state = {
       currentPlayList: normalize([
-        { media: { name: 'src3', src: require('./assets/img3.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 3000 },
+        { media: { name: 'src3', src: require('./assets/img3.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 2900 },
+        { media: { name: 'src1', src: require(`./assets/video1.mp4`), ext: '.mp4' }, effect: 'slideInLeft' },
         { media: { name: 'src1', src: require(`./assets/video1.mp4`), ext: '.mp4' }, effect: 'slideInLeft'},
-        { media: { name: 'src1', src: require(`./assets/video1.mp4`), ext: '.mp4' }, effect: 'slideInLeft'},
-        { media: { name: 'src4', src: require('./assets/img4.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 3000 },
-        { media: { name: 'src2', src: require('./assets/small.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 3000 },
+        { media: { name: 'src4', src: require('./assets/img4.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 2900 },
+        { media: { name: 'src2', src: require('./assets/small.mp4'), ext: '.mp4' }, effect: 'slideInLeft' },
         { media: { name: 'src5', src: require('./assets/viking.mp4'), ext: '.mp4' }, effect: 'slideInLeft', duration: 0 }
         ]),
       currentContentIndex: 0,
@@ -61,25 +62,39 @@ export default class TestApp extends React.Component {
   }
 
   render() {
-    // if (this.slideShowRef.current) {
-    //   if (!this.preTime) this.preTime = moment();
-    //   const nodeFlag = this.slideShowRef.current.nodeFlag;
-    //   this.status.push({
-    //     count: this.count + 1,
-    //     nodeFlag: nodeFlag,
-    //     current: {
-    //       name: this.slideShowRef.current.slide[Number(nodeFlag)].content.media.name,
-    //       step: this.slideShowRef.current.slide[Number(nodeFlag)].step
-    //     },
-    //     next: {
-    //       name: this.slideShowRef.current.slide[Number(!nodeFlag)].content.media.name,
-    //       step: this.slideShowRef.current.slide[Number(!nodeFlag)].step
-    //     },
-    //     duration: timeCount * 200,
-    //   });
-    //   this.preTime = moment();
-    //   this.count += 1;
-    // }
+    if (this.slideShowRef.current) {
+      if (!this.preTime) this.preTime = timeCount;
+      const nodeFlag = this.slideShowRef.current.nodeFlag;
+      let currentSource = this.slideShowRef.current.props.currentContent.media.source;
+      let currentType;
+      let nextSource = this.slideShowRef.current.props.nextContent.media.source;
+      let nextType;
+      if (this.slideShowRef.current.props.currentContent.media.type === 'video') {
+        currentType = 'video';
+      } else if (this.slideShowRef.current.props.currentContent.media.type === 'image') {
+        currentType = 'image';
+      }
+      if (this.slideShowRef.current.props.nextContent.media.type === 'video') {
+        nextType = 'video';
+      } else if (this.slideShowRef.current.props.nextContent.media.type === 'image') {
+        nextType = 'image';
+      }
+      this.status.push({
+        count: this.count + 1,
+        nodeFlag: nodeFlag,
+        current: {
+          source: currentSource,
+          type: currentType
+        },
+        next: {
+          source: nextSource,
+          type: nextType
+        },
+        duration: (timeCount - this.preTime) * 200,
+      });
+      this.preTime = timeCount;
+      this.count += 1;
+    }
     let { currentContentIndex, currentPlayList } = this.state;
     let currentContent = currentPlayList[currentContentIndex];
     let nextContent = currentPlayList[(currentContentIndex + 1) % currentPlayList.length];
