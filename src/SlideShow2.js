@@ -76,7 +76,9 @@ class SlideShow2 extends React.Component {
     }
     this.videoSlide.source = resolveAssetSource(this.videoSlide.source);
     if (this.repeat) this.videoSlide.source.mainVer = this.count++;
-    this.repeat = _.isEqual(currentContent.media.source, nextContent.media.source);
+    if (currentContent.media.type === 'video') {
+      this.repeat = _.isEqual(currentContent.media.source, nextContent.media.source);
+    }
   }
   UNSAFE_componentWillReceiveProps(props) {
     this.preRender(props);

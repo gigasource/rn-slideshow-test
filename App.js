@@ -39,6 +39,8 @@ export default class TestApp extends React.Component {
     this.state = {
       currentPlayList: normalize([
         { media: { name: 'src3', src: require('./assets/img3.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 2900 },
+        { media: { name: 'src6', src: require('./assets/img3.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 2900 },
+        { media: { name: 'src7', src: require('./assets/img4.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 2900 },
         { media: { name: 'src1', src: require(`./assets/video1.mp4`), ext: '.mp4' }, effect: 'slideInLeft' },
         { media: { name: 'src1', src: require(`./assets/video1.mp4`), ext: '.mp4' }, effect: 'slideInLeft'},
         { media: { name: 'src4', src: require('./assets/img4.jpeg'), ext: '.jpg' }, effect: 'slideInLeft', duration: 2900 },
